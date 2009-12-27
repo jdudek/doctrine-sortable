@@ -49,11 +49,6 @@ class Doctrine_Template_Sortable_TestCase extends Doctrine_UnitTestCase
     public function prepareData()
     { }
 
-    public function testMyTest()
-    {
-        $this->assertEqual(1, 1);
-    }
-
     public function testRecordsAreSorted()
     {
         $item1 = new SortableItem();
