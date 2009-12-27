@@ -32,9 +32,17 @@
  */
 class Doctrine_Template_Listener_Sortable extends Doctrine_Record_Listener
 {
+    protected $_options = array();
+
+    public function __construct(array $options)
+    {
+        $this->_options = $options;
+    }
+    
     public function postInsert(Doctrine_Event $event)
     {
-        $event->getInvoker()->position = $event->getInvoker()->id;
+        $name = $event->getInvoker()->getTable()->getFieldName($this->_options['name']);
+        $event->getInvoker()->$name = $event->getInvoker()->id;
         $event->getInvoker()->save();
     }
 }

@@ -42,6 +42,7 @@ class Doctrine_Template_Sortable_TestCase extends Doctrine_UnitTestCase
         $this->tables[] = "SortableItem";
         $this->tables[] = "SortableItem1";
         $this->tables[] = "SortableItem2";
+        $this->tables[] = "SortableItem3";
         parent::prepareTables();
     }
 
@@ -235,6 +236,16 @@ class Doctrine_Template_Sortable_TestCase extends Doctrine_UnitTestCase
         $this->assertTrue($item2_1->position < $item2_2->position);
     }
 
+    public function testAlias()
+    {
+        $item1 = new SortableItem3();
+        $item1->save();
+        $item2 = new SortableItem3();
+        $item2->save();
+        $item2->moveUp();
+
+        $this->assertTrue($item2->myPos < $item1->myPos);
+    }
 }
 
 class SortableItem extends Doctrine_Record
@@ -282,5 +293,20 @@ class SortableItem2 extends Doctrine_Record
     {
         parent::setUp();
         $this->actAs('Sortable', array('manyListsBy' => array('listId1', 'listId2')));
+    }
+}
+
+class SortableItem3 extends Doctrine_Record
+{
+    public function setTableDefinition()
+    {
+        $this->setTableName('my_item3');
+        $this->hasColumn('name', 'string', 50);
+    }
+
+    public function setUp()
+    {
+        parent::setUp();
+        $this->actAs('Sortable', array('name' => 'pos', 'alias' => 'myPos'));
     }
 }

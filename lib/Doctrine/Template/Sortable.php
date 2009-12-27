@@ -40,13 +40,17 @@ class Doctrine_Template_Sortable extends Doctrine_Template
 
     public function setTableDefinition()
     {
-        $this->hasColumn('position', 'integer');
-        $this->addListener(new Doctrine_Template_Listener_Sortable());
+        $name = $this->_options['name'];
+        if ($this->_options['alias']) {
+            $name .= ' as ' . $this->_options['alias'];
+        }
+        $this->hasColumn($name, 'integer');
+        $this->addListener(new Doctrine_Template_Listener_Sortable($this->_options));
     }
 
     public function getPrevious()
     {
-        $name = $this->_options['name'];
+        $name = $this->getInvoker()->getTable()->getFieldName($this->_options['name']);
         $q = $this->getInvoker()->getTable()->createQuery()
             ->addWhere("$name < ?", $this->getInvoker()->$name)
             ->orderBy("$name DESC");
@@ -58,7 +62,7 @@ class Doctrine_Template_Sortable extends Doctrine_Template
 
     public function getNext()
     {
-        $name = $this->_options['name'];
+        $name = $this->getInvoker()->getTable()->getFieldName($this->_options['name']);
         $q = $this->getInvoker()->getTable()->createQuery()
             ->addWhere("$name > ?", $this->getInvoker()->$name)
             ->orderBy("$name ASC");
@@ -71,6 +75,7 @@ class Doctrine_Template_Sortable extends Doctrine_Template
     public function swapWith(Doctrine_Record $record2)
     {
         $record1 = $this->getInvoker();
+        $name = $this->getInvoker()->getTable()->getFieldName($this->_options['name']);
 
         foreach ($this->_options['manyListsBy'] as $col) {
             if ($record1->$col != $record2->$col) {
@@ -81,10 +86,10 @@ class Doctrine_Template_Sortable extends Doctrine_Template
         $conn = $this->getTable()->getConnection();
         $conn->beginTransaction();
 
-        $pos1 = $record1->position;
-        $pos2 = $record2->position;
-        $record1->position = $pos2;
-        $record2->position = $pos1;
+        $pos1 = $record1->$name;
+        $pos2 = $record2->$name;
+        $record1->$name = $pos2;
+        $record2->$name = $pos1;
         $record1->save();
         $record2->save();
 
