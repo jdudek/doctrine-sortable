@@ -111,4 +111,24 @@ class Doctrine_Template_Sortable extends Doctrine_Template
             $this->getInvoker()->swapWith($next);
         }
     }
+
+    public function findFirstTableProxy($whichList = array())
+    {
+        $name = $this->getInvoker()->getTable()->getFieldName($this->_options['name']);
+        $q = $this->getInvoker()->getTable()->createQuery()->orderBy("$name ASC");
+        foreach ($whichList as $col => $val) {
+            $q->addWhere("$col = ?", $val);
+        }
+        return $q->fetchOne();
+    }
+
+    public function findLastTableProxy($whichList = array())
+    {
+        $name = $this->getInvoker()->getTable()->getFieldName($this->_options['name']);
+        $q = $this->getInvoker()->getTable()->createQuery()->orderBy("$name DESC");
+        foreach ($whichList as $col => $val) {
+            $q->addWhere("$col = ?", $val);
+        }
+        return $q->fetchOne();
+    }
 }

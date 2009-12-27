@@ -241,6 +241,42 @@ class Doctrine_Template_Sortable_TestCase extends Doctrine_UnitTestCase
 
         $this->assertTrue($item2->myPos < $item1->myPos);
     }
+
+    public function testFindFirstAndLast()
+    {
+        parent::prepareTables();
+        $item1 = new SortableItem();
+        $item1->save();
+        $item2 = new SortableItem();
+        $item2->save();
+
+        $this->assertEqual($item1->id, Doctrine::getTable('SortableItem')->findFirst()->id);
+        $this->assertEqual($item2->id, Doctrine::getTable('SortableItem')->findLast()->id);
+    }
+
+    public function testFindFirstAndLastWithManyLists()
+    {
+        parent::prepareTables();
+        $item1_1 = new SortableItem1();
+        $item1_1->listId = 1;
+        $item1_1->save();
+        $item2_1 = new SortableItem1();
+        $item2_1->listId = 2;
+        $item2_1->save();
+        $item1_2 = new SortableItem1();
+        $item1_2->listId = 1;
+        $item1_2->save();
+        $item2_2 = new SortableItem1();
+        $item2_2->listId = 2;
+        $item2_2->save();
+
+        $table = Doctrine::getTable('SortableItem1');
+
+        $this->assertEqual($item1_1->id, $table->findFirst(array('listId' => 1))->id);
+        $this->assertEqual($item1_2->id, $table->findLast(array('listId' => 1))->id);
+        $this->assertEqual($item2_1->id, $table->findFirst(array('listId' => 2))->id);
+        $this->assertEqual($item2_2->id, $table->findLast(array('listId' => 2))->id);
+    }
 }
 
 class SortableItem extends Doctrine_Record
