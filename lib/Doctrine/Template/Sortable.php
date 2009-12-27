@@ -32,7 +32,11 @@
  */
 class Doctrine_Template_Sortable extends Doctrine_Template
 {
-    protected $_options = array('manyListsColumn' => null);
+    protected $_options = array(
+        'name' => 'position',
+        'alias' => '',
+        'manyListsBy' => array(),
+    );
 
     public function setTableDefinition()
     {
@@ -42,26 +46,24 @@ class Doctrine_Template_Sortable extends Doctrine_Template
 
     public function getPrevious()
     {
-        $many = $this->_options['manyListsColumn'];
-
+        $name = $this->_options['name'];
         $q = $this->getInvoker()->getTable()->createQuery()
-            ->addWhere('position < ?', $this->getInvoker()->position)
-            ->orderBy('position DESC');
-        if (!empty($many)) {
-            $q->addWhere($many . ' = ?', $this->getInvoker()->$many);
+            ->addWhere("$name < ?", $this->getInvoker()->$name)
+            ->orderBy("$name DESC");
+        foreach ($this->_options['manyListsBy'] as $col) {
+            $q->addWhere($col . ' = ?', $this->getInvoker()->$col);
         }
         return $q->fetchOne();
     }
 
     public function getNext()
     {
-        $many = $this->_options['manyListsColumn'];
-
+        $name = $this->_options['name'];
         $q = $this->getInvoker()->getTable()->createQuery()
-            ->addWhere('position > ?', $this->getInvoker()->position)
-            ->orderBy('position ASC');
-        if (!empty($many)) {
-            $q->addWhere($many . ' = ?', $this->getInvoker()->$many);
+            ->addWhere("$name > ?", $this->getInvoker()->$name)
+            ->orderBy("$name ASC");
+        foreach ($this->_options['manyListsBy'] as $col) {
+            $q->addWhere($col . ' = ?', $this->getInvoker()->$col);
         }
         return $q->fetchOne();
     }
@@ -70,9 +72,8 @@ class Doctrine_Template_Sortable extends Doctrine_Template
     {
         $record1 = $this->getInvoker();
 
-        $many = $this->_options['manyListsColumn'];
-        if (!empty($many)) {
-            if ($record1->$many != $record2->$many) {
+        foreach ($this->_options['manyListsBy'] as $col) {
+            if ($record1->$col != $record2->$col) {
                 throw new Doctrine_Record_Exception('Cannot swap items from different lists.');
             }
         }

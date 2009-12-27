@@ -41,6 +41,7 @@ class Doctrine_Template_Sortable_TestCase extends Doctrine_UnitTestCase
     {
         $this->tables[] = "SortableItem";
         $this->tables[] = "SortableItem1";
+        $this->tables[] = "SortableItem2";
         parent::prepareTables();
     }
 
@@ -208,6 +209,32 @@ class Doctrine_Template_Sortable_TestCase extends Doctrine_UnitTestCase
             $this->pass();
         }
     }
+
+    public function testManyListsByMoreColumns()
+    {
+        $item1_1 = new SortableItem2();
+        $item1_1->listId1 = 1;
+        $item1_1->listId2 = 1;
+        $item1_1->save();
+        $item2_1 = new SortableItem2();
+        $item2_1->listId1 = 1;
+        $item2_1->listId2 = 2;
+        $item2_1->save();
+        $item1_2 = new SortableItem2();
+        $item1_2->listId1 = 1;
+        $item1_2->listId2 = 1;
+        $item1_2->save();
+        $item2_2 = new SortableItem2();
+        $item2_2->listId1 = 1;
+        $item2_2->listId2 = 2;
+        $item2_2->save();
+        $this->assertTrue($item1_1->position < $item1_2->position);
+        $this->assertTrue($item2_1->position < $item2_2->position);
+        $item1_1->swapWith($item1_2);
+        $this->assertTrue($item1_2->position < $item1_1->position);
+        $this->assertTrue($item2_1->position < $item2_2->position);
+    }
+
 }
 
 class SortableItem extends Doctrine_Record
@@ -237,6 +264,23 @@ class SortableItem1 extends Doctrine_Record
     public function setUp()
     {
         parent::setUp();
-        $this->actAs('Sortable', array('manyListsColumn' => 'listId'));
+        $this->actAs('Sortable', array('manyListsBy' => array('listId')));
+    }
+}
+
+class SortableItem2 extends Doctrine_Record
+{
+    public function setTableDefinition()
+    {
+        $this->setTableName('my_item2');
+        $this->hasColumn('name', 'string', 50);
+        $this->hasColumn('listId1', 'integer');
+        $this->hasColumn('listId2', 'integer');
+    }
+
+    public function setUp()
+    {
+        parent::setUp();
+        $this->actAs('Sortable', array('manyListsBy' => array('listId1', 'listId2')));
     }
 }
