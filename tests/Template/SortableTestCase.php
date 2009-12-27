@@ -277,6 +277,32 @@ class Doctrine_Template_Sortable_TestCase extends Doctrine_UnitTestCase
         $this->assertEqual($item2_1->id, $table->findFirst(array('listId' => 2))->id);
         $this->assertEqual($item2_2->id, $table->findLast(array('listId' => 2))->id);
     }
+
+    public function testFindFirstRequiresListId()
+    {
+        parent::prepareTables();
+        $table = Doctrine::getTable('SortableItem2');
+        try {
+            $table->findFirst();
+            $this->fail();
+        } catch (Doctrine_Record_Exception $e) { }
+        try {
+            $table->findFirst('1');
+            $this->fail();
+        } catch (Doctrine_Record_Exception $e) { }
+        try {
+            $table->findFirst(array());
+            $this->fail();
+        } catch (Doctrine_Record_Exception $e) { }
+        try {
+            $table->findFirst(array('listId1' => 1));
+            $this->fail();
+        } catch (Doctrine_Record_Exception $e) { }
+        try {
+            $table->findFirst(array('listId1' => 1, 'listId2' => 1, 'listId3' => 1));
+            $this->fail();
+        } catch (Doctrine_Record_Exception $e) { }
+    }
 }
 
 class SortableItem extends Doctrine_Record

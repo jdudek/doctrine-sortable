@@ -114,24 +114,30 @@ class Doctrine_Template_Sortable extends Doctrine_Template
 
     public function findFirstTableProxy($whichList = array())
     {
+        return $this->findFirstOrLast($whichList, 'ASC');
+    }
+
+    public function findLastTableProxy($whichList = array())
+    {
+        return $this->findFirstOrLast($whichList, 'DESC');
+    }
+
+    private function findFirstOrLast($whichList, $order)
+    {
         $name = $this->getName();
-        $q = $this->getInvoker()->getTable()->createQuery()->orderBy("$name ASC");
+        $q = $this->getInvoker()->getTable()->createQuery()->orderBy("$name $order");
+        if (!is_array($whichList) ||
+            array_diff($this->_options['manyListsBy'], array_keys($whichList)) ||
+            array_diff(array_keys($whichList), $this->_options['manyListsBy'])
+        ) {
+            throw new Doctrine_Record_Exception('Improper list identifier.');
+        }
         foreach ($whichList as $col => $val) {
             $q->addWhere("$col = ?", $val);
         }
         return $q->fetchOne();
     }
 
-    public function findLastTableProxy($whichList = array())
-    {
-        $name = $this->getName();
-        $q = $this->getInvoker()->getTable()->createQuery()->orderBy("$name DESC");
-        foreach ($whichList as $col => $val) {
-            $q->addWhere("$col = ?", $val);
-        }
-        return $q->fetchOne();
-    }
-    
     private function getName()
     {
         return $this->getInvoker()->getTable()->getFieldName($this->_options['name']);
