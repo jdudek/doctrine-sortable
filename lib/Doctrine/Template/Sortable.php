@@ -50,7 +50,7 @@ class Doctrine_Template_Sortable extends Doctrine_Template
 
     public function getPrevious()
     {
-        $name = $this->getInvoker()->getTable()->getFieldName($this->_options['name']);
+        $name = $this->getName();
         $q = $this->getInvoker()->getTable()->createQuery()
             ->addWhere("$name < ?", $this->getInvoker()->$name)
             ->orderBy("$name DESC");
@@ -62,7 +62,7 @@ class Doctrine_Template_Sortable extends Doctrine_Template
 
     public function getNext()
     {
-        $name = $this->getInvoker()->getTable()->getFieldName($this->_options['name']);
+        $name = $this->getName();
         $q = $this->getInvoker()->getTable()->createQuery()
             ->addWhere("$name > ?", $this->getInvoker()->$name)
             ->orderBy("$name ASC");
@@ -75,7 +75,7 @@ class Doctrine_Template_Sortable extends Doctrine_Template
     public function swapWith(Doctrine_Record $record2)
     {
         $record1 = $this->getInvoker();
-        $name = $this->getInvoker()->getTable()->getFieldName($this->_options['name']);
+        $name = $this->getName();
 
         foreach ($this->_options['manyListsBy'] as $col) {
             if ($record1->$col != $record2->$col) {
@@ -114,7 +114,7 @@ class Doctrine_Template_Sortable extends Doctrine_Template
 
     public function findFirstTableProxy($whichList = array())
     {
-        $name = $this->getInvoker()->getTable()->getFieldName($this->_options['name']);
+        $name = $this->getName();
         $q = $this->getInvoker()->getTable()->createQuery()->orderBy("$name ASC");
         foreach ($whichList as $col => $val) {
             $q->addWhere("$col = ?", $val);
@@ -124,11 +124,16 @@ class Doctrine_Template_Sortable extends Doctrine_Template
 
     public function findLastTableProxy($whichList = array())
     {
-        $name = $this->getInvoker()->getTable()->getFieldName($this->_options['name']);
+        $name = $this->getName();
         $q = $this->getInvoker()->getTable()->createQuery()->orderBy("$name DESC");
         foreach ($whichList as $col => $val) {
             $q->addWhere("$col = ?", $val);
         }
         return $q->fetchOne();
+    }
+    
+    private function getName()
+    {
+        return $this->getInvoker()->getTable()->getFieldName($this->_options['name']);
     }
 }
