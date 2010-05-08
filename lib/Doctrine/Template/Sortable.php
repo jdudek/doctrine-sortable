@@ -50,26 +50,12 @@ class Doctrine_Template_Sortable extends Doctrine_Template
 
     public function getPrevious()
     {
-        $name = $this->getName();
-        $q = $this->getInvoker()->getTable()->createQuery()
-            ->addWhere("$name < ?", $this->getInvoker()->$name)
-            ->orderBy("$name DESC");
-        foreach ($this->_options['manyListsBy'] as $col) {
-            $q->addWhere($col . ' = ?', $this->getInvoker()->$col);
-        }
-        return $q->fetchOne();
+        return $this->getPreviousOrNext('<', 'DESC');
     }
 
     public function getNext()
     {
-        $name = $this->getName();
-        $q = $this->getInvoker()->getTable()->createQuery()
-            ->addWhere("$name > ?", $this->getInvoker()->$name)
-            ->orderBy("$name ASC");
-        foreach ($this->_options['manyListsBy'] as $col) {
-            $q->addWhere($col . ' = ?', $this->getInvoker()->$col);
-        }
-        return $q->fetchOne();
+        return $this->getPreviousOrNext('>', 'ASC');
     }
 
     public function swapWith(Doctrine_Record $record2)
@@ -114,40 +100,12 @@ class Doctrine_Template_Sortable extends Doctrine_Template
 
     public function moveToTop()
     {
-        $conn = $this->getTable()->getConnection();
-        $conn->beginTransaction();
-
-        $name = $this->getName();
-
-        $q = $this->_table->createQuery()
-            ->addWhere("$name < ?", $this->getInvoker()->$name)
-            ->orderBy("$name DESC");
-        foreach ($this->_options['manyListsBy'] as $col) {
-            $q->addWhere($col . ' = ?', $this->getInvoker()->$col);
-        }
-        foreach ($q->execute() as $item) {
-            $this->getInvoker()->swapWith($item);
-        }
-        $conn->commit();
+        $this->moveToTopOrBottom('<', 'DESC');
     }
 
     public function moveToBottom()
     {
-        $conn = $this->getTable()->getConnection();
-        $conn->beginTransaction();
-
-        $name = $this->getName();
-
-        $q = $this->_table->createQuery()
-            ->addWhere("$name > ?", $this->getInvoker()->$name)
-            ->orderBy("$name ASC");
-        foreach ($this->_options['manyListsBy'] as $col) {
-            $q->addWhere($col . ' = ?', $this->getInvoker()->$col);
-        }
-        foreach ($q->execute() as $item) {
-            $this->getInvoker()->swapWith($item);
-        }
-        $conn->commit();
+        $this->moveToTopOrBottom('>', 'ASC');
     }
 
     public function findFirstTableProxy($whichList = array())
@@ -158,6 +116,37 @@ class Doctrine_Template_Sortable extends Doctrine_Template
     public function findLastTableProxy($whichList = array())
     {
         return $this->findFirstOrLast($whichList, 'DESC');
+    }
+
+    private function getPreviousOrNext($rel, $ord)
+    {
+        $name = $this->getName();
+        $q = $this->getInvoker()->getTable()->createQuery()
+            ->addWhere("$name $rel ?", $this->getInvoker()->$name)
+            ->orderBy("$name $ord");
+        foreach ($this->_options['manyListsBy'] as $col) {
+            $q->addWhere($col . ' = ?', $this->getInvoker()->$col);
+        }
+        return $q->fetchOne();
+    }
+
+    private function moveToTopOrBottom($rel, $ord)
+    {
+        $conn = $this->getTable()->getConnection();
+        $conn->beginTransaction();
+
+        $name = $this->getName();
+
+        $q = $this->_table->createQuery()
+            ->addWhere("$name $rel ?", $this->getInvoker()->$name)
+            ->orderBy("$name $ord");
+        foreach ($this->_options['manyListsBy'] as $col) {
+            $q->addWhere($col . ' = ?', $this->getInvoker()->$col);
+        }
+        foreach ($q->execute() as $item) {
+            $this->getInvoker()->swapWith($item);
+        }
+        $conn->commit();
     }
 
     private function findFirstOrLast($whichList, $order)
