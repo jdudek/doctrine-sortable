@@ -112,6 +112,44 @@ class Doctrine_Template_Sortable extends Doctrine_Template
         }
     }
 
+    public function moveToTop()
+    {
+        $conn = $this->getTable()->getConnection();
+        $conn->beginTransaction();
+
+        $name = $this->getName();
+
+        $q = $this->_table->createQuery()
+            ->addWhere("$name < ?", $this->getInvoker()->$name)
+            ->orderBy("$name DESC");
+        foreach ($this->_options['manyListsBy'] as $col) {
+            $q->addWhere($col . ' = ?', $this->getInvoker()->$col);
+        }
+        foreach ($q->execute() as $item) {
+            $this->getInvoker()->swapWith($item);
+        }
+        $conn->commit();
+    }
+
+    public function moveToBottom()
+    {
+        $conn = $this->getTable()->getConnection();
+        $conn->beginTransaction();
+
+        $name = $this->getName();
+
+        $q = $this->_table->createQuery()
+            ->addWhere("$name > ?", $this->getInvoker()->$name)
+            ->orderBy("$name ASC");
+        foreach ($this->_options['manyListsBy'] as $col) {
+            $q->addWhere($col . ' = ?', $this->getInvoker()->$col);
+        }
+        foreach ($q->execute() as $item) {
+            $this->getInvoker()->swapWith($item);
+        }
+        $conn->commit();
+    }
+
     public function findFirstTableProxy($whichList = array())
     {
         return $this->findFirstOrLast($whichList, 'ASC');

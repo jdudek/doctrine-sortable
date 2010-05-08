@@ -151,6 +151,52 @@ class Doctrine_Template_Sortable_TestCase extends Doctrine_UnitTestCase
         $this->assertTrue($item1->position < $item2->position);
     }
 
+    public function testMoveToTop()
+    {
+        parent::prepareTables();
+        $item1 = new SortableItem();
+        $item1->save();
+        $item2 = new SortableItem();
+        $item2->save();
+        $item3 = new SortableItem();
+        $item3->save();
+
+        $this->assertTrue($item1->position < $item2->position);
+        $this->assertTrue($item2->position < $item3->position);
+
+        $item3->moveToTop();
+
+        $item1->refresh();
+        $item2->refresh();
+        $item3->refresh();
+
+        $this->assertTrue($item3->position < $item1->position);
+        $this->assertTrue($item1->position < $item2->position);
+    }
+
+    public function testMoveToBottom()
+    {
+        parent::prepareTables();
+        $item1 = new SortableItem();
+        $item1->save();
+        $item2 = new SortableItem();
+        $item2->save();
+        $item3 = new SortableItem();
+        $item3->save();
+
+        $this->assertTrue($item1->position < $item2->position);
+        $this->assertTrue($item2->position < $item3->position);
+
+        $item1->moveToBottom();
+
+        $item1->refresh();
+        $item2->refresh();
+        $item3->refresh();
+
+        $this->assertTrue($item2->position < $item3->position);
+        $this->assertTrue($item3->position < $item1->position);
+    }
+
     public function testGetNextWithManyLists()
     {
         $item1_1 = new SortableItem1();
