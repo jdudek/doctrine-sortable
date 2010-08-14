@@ -1,1 +1,59 @@
 This is the introduction to the Sortable Doctrine extension which gives you sortable functionality to your models when enabled. Below you will find all the documentation on how to install and use the Sortable extension.
+
+Doctrine Sortable Extension
+
+After setup following functions are available:
+
+$item = Doctrine::getTable('MyTable')->find(1);
+
+$item->moveToTop();
+$item->moveToBottom();
+$item->moveUp();
+$item->moveDown();
+
+Changes will be saved to the DB. An additional call of save() ist not necessary.
+
+Definition:
+To use the extension you have to define it in the model.
+
+Options are:
+ * name: Name of position-column (default: 'position')
+ * alias: Aliasname of position-column (default: '')
+ * manyListsBy: Parent-columns. Has to be an array! (default: array())
+
+Example YAML:
+MyTable:
+    tableName: mytable
+    columns:
+        ...
+        position:
+            type: integer(4)
+            unsigned: 1
+    actAs:
+        Sortable:
+            manyListsBy: [parent_id]
+
+
+Example PHP:
+abstract class BaseMyTable extends Doctrine_Record
+{
+    public function setTableDefinition()
+    {
+        $this->setTableName('mytable');
+        ...
+        $this->hasColumn('position', 'integer', 4, array(
+             'type' => 'integer',
+             'unsigned' => 1,
+             'length' => '4',
+         ));
+    }
+    public function setUp()
+    {
+        parent::setUp();
+
+        $sortable0 = new Doctrine_Template_Sortable(array(
+             'manyListsBy' => array( 0 => 'parent_id' )
+        ));
+        $this->actAs($sortable0);
+    }
+}
