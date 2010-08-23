@@ -125,7 +125,11 @@ class Doctrine_Template_Sortable extends Doctrine_Template
             ->addWhere("$name $rel ?", $this->getInvoker()->$name)
             ->orderBy("$name $ord");
         foreach ($this->_options['manyListsBy'] as $col) {
-            $q->addWhere($col . ' = ?', $this->getInvoker()->$col);
+            if (is_null($this->getInvoker()->$col)) {
+                $q->addWhere($col . ' IS NULL');
+            } else {
+                $q->addWhere($col . ' = ?', $this->getInvoker()->$col);
+            }
         }
         return $q->fetchOne();
     }
@@ -141,7 +145,11 @@ class Doctrine_Template_Sortable extends Doctrine_Template
             ->addWhere("$name $rel ?", $this->getInvoker()->$name)
             ->orderBy("$name $ord");
         foreach ($this->_options['manyListsBy'] as $col) {
-            $q->addWhere($col . ' = ?', $this->getInvoker()->$col);
+            if (is_null($this->getInvoker()->$col)) {
+                $q->addWhere($col . ' IS NULL');
+            } else {
+                $q->addWhere($col . ' = ?', $this->getInvoker()->$col);
+            }
         }
         foreach ($q->execute() as $item) {
             $this->getInvoker()->swapWith($item);
@@ -160,7 +168,11 @@ class Doctrine_Template_Sortable extends Doctrine_Template
             throw new Doctrine_Record_Exception('Improper list identifier.');
         }
         foreach ($whichList as $col => $val) {
-            $q->addWhere("$col = ?", $val);
+            if (is_null($val)) {
+                $q->addWhere("$col IS NULL");
+            } else {
+                $q->addWhere("$col = ?", $val);
+            }
         }
         return $q->fetchOne();
     }
